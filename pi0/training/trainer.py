@@ -78,6 +78,7 @@ class Trainer:
             pin_memory=(self.device.type == "cuda"),
             collate_fn=_collate_fn,
             drop_last=True,
+            persistent_workers=training_config.num_workers > 0,
         )
 
         # Optimizer (only trainable params)
