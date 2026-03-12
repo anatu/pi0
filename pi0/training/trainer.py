@@ -52,7 +52,12 @@ class Trainer:
 
         # Device
         if training_config.device == "auto":
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            if torch.cuda.is_available():
+                self.device = torch.device("cuda")
+            elif torch.backends.mps.is_available():
+                self.device = torch.device("mps")
+            else:
+                self.device = torch.device("cpu")
         else:
             self.device = torch.device(training_config.device)
 
@@ -75,7 +80,7 @@ class Trainer:
             batch_size=training_config.batch_size,
             shuffle=True,
             num_workers=training_config.num_workers,
-            pin_memory=(self.device.type == "cuda"),
+            pin_memory=self.device.type == "cuda",
             collate_fn=_collate_fn,
             drop_last=True,
             persistent_workers=training_config.num_workers > 0,
@@ -253,7 +258,12 @@ class Trainer:
             (model, model_config, flow_config) tuple.
         """
         if device == "auto":
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+            if torch.cuda.is_available():
+                device = "cuda"
+            elif torch.backends.mps.is_available():
+                device = "mps"
+            else:
+                device = "cpu"
         checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
         model_cfg = checkpoint["model_config"]
         flow_cfg = checkpoint["flow_config"]
